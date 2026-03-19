@@ -342,35 +342,32 @@ function formatarTempo(segundos) {
 function enviarEstudoParaIA(materia, tempo, descricao) {
     usuarioAtual = carregarUsuario();
     
-    // Gerar ID único para a conversa
-    const idConversa = usuarioAtual.email + '-' + Date.now();
-    
-    // Dados para enviar ao webhook
     const dadosEstudo = {
-        sessionId: idConversa,
-        chatInput: `Acabei de estudar ${materia} por ${tempo}. ${descricao}. Me dê uma dica ou curiosidade sobre ${materia}.`,
+        mensagem: `Acabei de estudar ${materia} por ${tempo}. Descrição: ${descricao}`,
         email: usuarioAtual.email,
         materia: materia,
         tempo: tempo,
         nome: usuarioAtual.nome
     };
     
-    // Enviar para o n8n
-    fetch('http://localhost:5678/webhook/estudos_usuario', {  // URL do nosso webhook
+    fetch('https://olivdells.app.n8n.cloud/webhook-test/estudos_usuario', { 
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dadosEstudo)
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Resposta da IA:', data);
-        // Mostrar a dica da IA para o usuário
-        alert('Dica da IA: ' + (data.output || data.message || 'Continue estudando!'));
+        // Esta linha abaixo vai procurar a dica dentro da resposta, não importa onde ela esteja
+        console.log("Dados recebidos do n8n:", data);
+        
+        // Se a IA gerou a dica, ela estará em algum lugar do histórico. 
+        // Vamos tentar pegar o campo 'output' que é o padrão do AI Agent
+        const dicaIA = data.output || "Estudo registrado na planilha e e-mail enviado!";
+        
+        alert('Dica da IA: ' + dicaIA);
     })
     .catch(error => {
         console.error('Erro:', error);
-        alert('Erro ao conectar com a IA. Verifique se o n8n está rodando!');
+        alert('Erro ao conectar com a IA.');
     });
 }
