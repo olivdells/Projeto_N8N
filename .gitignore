@@ -1,0 +1,11 @@
+# Ambiente Virtual
+venv/
+
+# Python
+__pycache__/
+
+# VSCode
+.vscode/
+
+# Sistema Windows
+Thumbs.db

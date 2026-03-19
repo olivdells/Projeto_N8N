@@ -1,0 +1,393 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.Mensagem }}",
+        "options": {
+          "systemMessage": "Você é o Tutor Pro, um assistente inteligente de estudos de alto desempenho. Seu objetivo é ajudar estudantes a organizarem sua rotina.\n\nRegras de Comportamento:\n\nIdentifique o estudante pelo nome ou e-mail que vier nos dados.\n\nSempre que ele registrar um estudo, analise a matéria e dê uma dica técnica ou curiosidade acadêmica útil usando a Wikipedia se necessário.\n\nVerifique a agenda do Google para avisar sobre compromissos ou provas importantes.\n\nSe o tempo de estudo for baixo, incentive-o a fazer mais um ciclo de 25 minutos (Pomodoro).\n\nSeja motivador, profissional e use emojis para tornar a conversa amigável.\n\nSempre parabenizar o esforço do usuário.\n\nExemplo de tom de voz: 'Arrasou no estudo de Biologia! 🧬 Sabia que o DNA de um humano é 99% igual ao de um chimpanzé? Continua assim! 🔥'"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        112,
+        16
+      ],
+      "id": "4d7e3a6b-1ee0-4d48-a98b-1a8165e2d273",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        256
+      ],
+      "id": "8e1cf0fb-aace-44d0-88c7-45f39553af2a",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "x9RDO1R4cWGdMkrM",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.IdConversa }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        256
+      ],
+      "id": "c0cc5689-5f5f-4549-a8d8-548b9bdc911c",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        576,
+        256
+      ],
+      "id": "29d5a26a-6d04-4259-9886-2ba81cf1e490",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        320,
+        256
+      ],
+      "id": "dd86513c-4b09-40dc-b5cd-2144f4d7ca13",
+      "name": "Wikipedia"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook').item.json.body.email }}",
+        "subject": "Mandou bem no estudo de hoje! 🚀",
+        "message": "={{ $('AI Agent').item.json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        784,
+        16
+      ],
+      "id": "db132ab4-72d8-4f6d-99e6-57d56da498e0",
+      "name": "Send a message",
+      "webhookId": "eb13c246-a5cb-47e6-9a4c-4e1b7213d229",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "iPN7YhBGi4hD2drq",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1xznCFDZ2B63uparh-AwxcTN8mh7ySHBxdKgWqyUiigY",
+          "mode": "list",
+          "cachedResultName": "Sistemas de estudos IA ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xznCFDZ2B63uparh-AwxcTN8mh7ySHBxdKgWqyUiigY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xznCFDZ2B63uparh-AwxcTN8mh7ySHBxdKgWqyUiigY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Matéria": "={{ $('Webhook').item.json.body.materia }}",
+            "Data": "={{ $now.format('dd/MM/yyyy') }}",
+            "Semana do Ano": "={{ $now.weekNumber }}",
+            "Dica da IA": "={{ $json.output }}",
+            "Tempo de Estudo": "={{ $('Webhook').item.json.body.tempo }}",
+            "Email do Usuário": "={{ $('Webhook').item.json.body.email }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Email do Usuário",
+              "displayName": "Email do Usuário",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Matéria",
+              "displayName": "Matéria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tempo de Estudo",
+              "displayName": "Tempo de Estudo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Semana do Ano",
+              "displayName": "Semana do Ano",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Dica da IA",
+              "displayName": "Dica da IA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        512,
+        16
+      ],
+      "id": "0f135000-e527-4724-a758-136544ef0c51",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "vM5ku02cpyXNjE6y",
+          "name": "Google Sheets account 6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use esta ferramenta para listar e ler os compromissos da agenda do usuário para verificar disponibilidade e horários de estudo.",
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "dellamoreolivia08@gmail.com",
+          "mode": "list",
+          "cachedResultName": "dellamoreolivia08@gmail.com"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        448,
+        256
+      ],
+      "id": "2d9d8684-e9a3-44a9-bf9f-4db6ac96ddac",
+      "name": "Get many events in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "6QelU0rSOzGHAx6d",
+          "name": "Google Calendar OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "estudos_usuario",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -416,
+        16
+      ],
+      "id": "67eaf61e-e67b-4f6d-94fc-3e24088ea33d",
+      "name": "Webhook",
+      "webhookId": "d8318fb3-2162-4b41-b2d4-0e8055636c6b"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0b0b2e81-e574-444f-b21b-0bbae58d1588",
+              "name": "IdConversa",
+              "value": "={{ $json.sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "b022cc19-c341-4153-9913-c860656a6b1e",
+              "name": "Mensagem",
+              "value": "={{ $json.chatInput }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -144,
+        16
+      ],
+      "id": "37effe55-42a5-4a69-ae7d-eda8af0abca9",
+      "name": "Edit Fields"
+    }
+  ],
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a74912a1178de3030c1e15103a3527435d2a8948a5e353659c6744b90d2d8a94"
+  }
+}
