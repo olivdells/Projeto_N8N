@@ -197,36 +197,36 @@ function pausarCronometro() {
 function pararCronometro() {
     clearInterval(cronometroInterval);
     
-    if (tempoEstudo > 0 && atividadeEmAndamento) {  // se tem algum tempo estudado e tinha a atividade selecionada
-        // Registrar tempo de estudo
-        const registro = {
-            id: Date.now(),
-            atividadeId: atividadeEmAndamento,
-            tempoSegundos: tempoEstudo,
-            data: new Date().toISOString()
-        };
+    if (tempoEstudo > 0 && atividadeEmAndamento) {
+        // Buscar a atividade pelo ID 
+        const atividade = usuarioAtual.atividades.find(a => a.id === atividadeEmAndamento);
         
-        usuarioAtual = carregarUsuario();
-        usuarioAtual.registrosEstudo.push(registro);
-        salvarUsuario();
-        
-        alert(`Tempo registrado: ${formatarTempo(tempoEstudo)}`);
-        
-        // Formatar tempo para enviar (N8N)
-        const tempoFormatado = formatarTempo(tempoEstudo);
-
-        // Enviar para IA do N8N
-        enviarEstudoParaIA(
-            atividade.materia, 
-            tempoFormatado,
-            atividade.descricao
-        );
-
-        alert(`Tempo registrado: ${tempoFormatado}`);
-        carregarResumoSemana();
-
-        // Atualizar resumo
-        carregarResumoSemana();
+        if (atividade) {  // Verifica se encontrou a atividade
+            // Registrar tempo de estudo
+            const registro = {
+                id: Date.now(),
+                atividadeId: atividadeEmAndamento,
+                tempoSegundos: tempoEstudo,
+                data: new Date().toISOString()
+            };
+            
+            usuarioAtual = carregarUsuario();
+            usuarioAtual.registrosEstudo.push(registro);
+            salvarUsuario();
+            
+            // Formatar tempo para enviar
+            const tempoFormatado = formatarTempo(tempoEstudo);
+            
+            // Enviarpara IA n8n
+            enviarEstudoParaIA(
+                atividade.materia, 
+                tempoFormatado,
+                atividade.descricao
+            );
+            
+            alert(`Tempo registrado: ${tempoFormatado}`);
+            carregarResumoSemana();
+        }
     }
     
     // Resetar cronômetro
@@ -235,11 +235,10 @@ function pararCronometro() {
     cronometroAtivo = false;
     atualizarCronometro();
     
-    // Voltar botões para o estado inicial
     document.getElementById('btnIniciar').disabled = false;
     document.getElementById('btnPausar').disabled = true;
     document.getElementById('btnParar').disabled = true;
-    document.getElementById('selecionarAtividade').disabled = false;
+    document.getElementById('selectAtividade').disabled = false;
     document.getElementById('btnIniciar').innerHTML = '<i class="bi bi-play"></i> Iniciar';
 }
 

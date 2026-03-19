@@ -1,4 +1,6 @@
 {
+    "id": 1,
+    "name":"Sistema de estudos IA",
   "nodes": [
     {
       "parameters": {
